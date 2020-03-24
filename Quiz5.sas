@@ -29,7 +29,7 @@ length hdgCd_char$3;
 hdgCd_char=left(hdgCd);
 if hdgCd_char in('250','E11','E10') then DM=1;*diabetes flag; else DM=0;
 run;
-*the codes from slides did not work for me so I needed to trim hdgcd;
+*the codes from slides did not work for me so I needed to create new var for trimmed hdgcd;
 
 proc means data=out.diabetes;
 class hdgHraEncWID;
@@ -43,27 +43,23 @@ tables DM count;
 run;
 
 *link databases;
-*rename encounter IDs;
-proc sort data=out.abstract;
-by hraEncWID;
-run;
-
-proc sort data=out.diabetes2 out=out.diabetes3 (rename=hdgHraEncWID=hraEncWID);
-by hdgHraEncWID;
-run;
-
 proc sql;
 create table out.sql_final as
 select abs.*,dm.*
 from out.abstract as abs
-	 inner join
+	 left join
      out.diabetes2 as dm
 	 on abs.hraEncWID = dm.hdgHraEncWID
 ;
 quit;
-*n=1981;
+*n=2230;
+
+data out.sql_final;
+set out.sql_final;
+if DM=. then DM=0;
+run;
 
 proc freq data=out.sql_final;
 table DM;
 run;
-*83/1898 is the proportion of admissions which recorded a diagnosis of diabetes for admissions between  January 1st 2003 and December 31st, 2004;
+*83/2230 is the proportion of admissions which recorded a diagnosis of diabetes for admissions between  January 1st 2003 and December 31st, 2004;
