@@ -150,43 +150,36 @@ encounter and one emergency room encounter would have a total encounter count of
 Generate a frequency table of total encounter number for this data set, and paste the (text) 
 table into your assignment- use the SAS tip from class to make the table output text-friendly;
 
-*delete patient with both emerg and inpatient data;
-data eithertype;
-set sql_table;
-if (emerg=1 and inpt=1) then delete;
-run;
-*n=2730;
-
 *create var for total number of encounters;
-data eithertype;
-set eithertype;
+data sql_table;
+set sql_table;
 totalenc=count1 + count2;
 run;
 
 ods listing;
 options formchar="|----|+|---+=|-/\<>*";
-proc freq data=eithertype;
+proc freq data=sql_table;
 table totalenc;
 title 'Total Number of Emergency or Inpatient Visits';
 run;
-*n=2730;
 
 /*
-                            Total Number of Emergency or Inpatient Visits                          264
-                                                                         15:53 Tuesday, March 31, 2020
+                            Total Number of Emergency or Inpatient Visits                            7
+                                                                         17:56 Tuesday, March 31, 2020
 
                                           The FREQ Procedure
 
                                                          Cumulative    Cumulative
                     totalenc    Frequency     Percent     Frequency      Percent
                     -------------------------------------------------------------
-                           1        2556       93.63          2556        93.63
-                           2         142        5.20          2698        98.83
-                           3          21        0.77          2719        99.60
-                           4           7        0.26          2726        99.85
-                           5           1        0.04          2727        99.89
-                           6           1        0.04          2728        99.93
-                           7           1        0.04          2729        99.96
-                          12           1        0.04          2730       100.00
+                           1        2556       88.41          2556        88.41
+                           2         270        9.34          2826        97.75
+                           3          45        1.56          2871        99.31
+                           4          14        0.48          2885        99.79
+                           5           3        0.10          2888        99.90
+                           6           1        0.03          2889        99.93
+                           7           1        0.03          2890        99.97
+                          12           1        0.03          2891       100.00
+
 
 */
