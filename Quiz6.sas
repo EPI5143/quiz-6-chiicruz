@@ -24,14 +24,13 @@ Please submit your solutions through Github as a plain text .sas or .txt file.
 
 libname source "D:\uOttawa\4 EPI 5143-large data\class data\ntables";
 
-*retrieve dataset;
+*retrieve dataset, based on the hint - Use EncStartDtm to identify encounters occurring in 2003;
+*my understanding based on the hint that the data will only include encounters from 2003;
 data enc;
 set source.nencounter (keep=EncWID EncPatWID EncStartDtm EncVisitTypeCd);
-admindate=datepart(EncStartDtm);
-format admindate date9.;
-if admindate<'01JAN2003'd then delete;
+if year(datepart(EncStartDtm))=2003;
 run;
-*n=13389;
+*n=3327;
 
 *remove duplicates;
 proc sort data=enc out=encnodup nodupkey;
@@ -61,18 +60,19 @@ title 'Admissions from 01JAN2003 with Inpatient Visits';
 run;
 
 /*
-                           Admissions from 01JAN2003 with Inpatient Visits                           2
-                                                                         12:58 Tuesday, March 31, 2020
+                           Admissions from 01JAN2003 with Inpatient Visits                           1
+                                                                         15:53 Tuesday, March 31, 2020
 
                                           The FREQ Procedure
 
                                                        Cumulative    Cumulative
                       inpt    Frequency     Percent     Frequency      Percent
                       ---------------------------------------------------------
-                         0        6338       61.50          6338        61.50
-                         1        3967       38.50         10305       100.00
+                         0        1817       62.85          1817        62.85
+                         1        1074       37.15          2891       100.00
+
 */
-/* ANSWER: There are 3967 patients had at least 1 inpatient encounter that started in 2003*/
+/* ANSWER: There are 1074 patients had at least 1 inpatient encounter in 2003*/
 
 *b) How many patients had at least 1 emergency room encounter that started in 2003?; 
 data enc;
@@ -96,20 +96,21 @@ title 'Admissions from 01JAN2003 with Emergency Visits';
 run;
 
 /*
-                           Admissions from 01JAN2003 with Emergency Visits                         452
-                                                                         12:58 Tuesday, March 31, 2020
+                           Admissions from 01JAN2003 with Emergency Visits                         129
+                                                                         15:53 Tuesday, March 31, 2020
 
                                           The FREQ Procedure
 
                                                         Cumulative    Cumulative
                       emerg    Frequency     Percent     Frequency      Percent
                       ----------------------------------------------------------
-                          0        3064       29.73          3064        29.73
-                          1        7241       70.27         10305       100.00
+                          0         913       31.58           913        31.58
+                          1        1978       68.42          2891       100.00
+
 
 
 */
-/* ANSWER: There are 7241 patients had at least 1 emergency encounter that started in 2003*/
+/* ANSWER: There are 1978 patients had at least 1 emergency encounter in 2003*/
 
 
 *c) How many patients had at least 1 visit of either type (inpatient or emergency room 
@@ -125,16 +126,16 @@ from emerg as em
 	 on em.encPatWID = in.encPatWID
 ;
 quit;
-*n=10305;
+*n=2891;
 
 *delete with both emerg and inpatient data;
 data eithertype;
 set sql_final;
 if (emerg=1 and inpt=1) then delete;
 run;
-*n=9402;
+*n=2730;
 
-/*ANSWER: There are 9402 patients had at least 1 visit of either type (inpatient or emergency room 
+/*ANSWER: There are 2730 patients had at least 1 visit of either type (inpatient or emergency room 
 encounter) that started in 2003*/
 
 
@@ -156,26 +157,25 @@ proc freq data=eithertype;
 table totalenc;
 title 'Total Number of Emergency or Inpatient Visits';
 run;
-*n=9402;
+*n=2730;
 
 /*
-                     Total Number of Emergency or Inpatient Visits per Patient ID                 4246
-                                                                         12:58 Tuesday, March 31, 2020
+                            Total Number of Emergency or Inpatient Visits                          130
+                                                                         15:53 Tuesday, March 31, 2020
 
                                           The FREQ Procedure
 
                                                          Cumulative    Cumulative
                     totalenc    Frequency     Percent     Frequency      Percent
                     -------------------------------------------------------------
-                           2        8314       88.43          8314        88.43
-                           4         880        9.36          9194        97.79
-                           6         143        1.52          9337        99.31
-                           8          37        0.39          9374        99.70
-                          10          13        0.14          9387        99.84
-                          12           4        0.04          9391        99.88
-                          14           3        0.03          9394        99.91
-                          16           4        0.04          9398        99.96
-                          18           3        0.03          9401        99.99
-                          26           1        0.01          9402       100.00
+                           2        2556       93.63          2556        93.63
+                           4         142        5.20          2698        98.83
+                           6          21        0.77          2719        99.60
+                           8           7        0.26          2726        99.85
+                          10           1        0.04          2727        99.89
+                          12           1        0.04          2728        99.93
+                          14           1        0.04          2729        99.96
+                          24           1        0.04          2730       100.00
+
 
 */
