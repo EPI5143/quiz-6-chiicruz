@@ -39,28 +39,33 @@ run;
 *no duplicates;
 
 *a) How many patients had at least 1 inpatient encounter that started in 2003?;
-data enc;
-set enc;
-inpt=0;
-if EncVisitTypeCd="INPT" then inpt=1;*inpatient flag;
+proc sort data=enc out=inpt;
+by EncPatWID;
 run;
 
-proc means data=enc;
-class encPatWID;
-types encPatWID;
-var inpt;
-output out=inpt max(inpt)=inpt n(inpt)=count1;
+data inpt;
+set inpt;
+by EncPatWID;
+if first.EncPatWID then do;
+inpt=0; count1=0;
+end;
+if EncVisitTypeCd="INPT" then do;
+inpt=1;*inpatient flag;count1=count1+1;
+end;
+if last.EncPatWID then output;
+retain inpt count1;
 run;
+*n=2891;
 
 ods listing;
 options formchar="|----|+|---+=|-/\<>*"; 
 proc freq data=inpt;
 tables inpt count1;
-title 'Admissions from 01JAN2003 with Inpatient Visits';
+title 'Admissions from 2003 with Inpatient Visits';
 run;
 
 /*
-                           Admissions from 01JAN2003 with Inpatient Visits                           1
+                              Admissions from 2003 with Inpatient Visits                           258
                                                                          15:53 Tuesday, March 31, 2020
 
                                           The FREQ Procedure
@@ -71,32 +76,38 @@ run;
                          0        1817       62.85          1817        62.85
                          1        1074       37.15          2891       100.00
 
+
 */
 /* ANSWER: There are 1074 patients had at least 1 inpatient encounter in 2003*/
 
 *b) How many patients had at least 1 emergency room encounter that started in 2003?; 
-data enc;
-set enc;
-emerg=0;
-if EncVisitTypeCd="EMERG" then emerg=1;*emerg flag;
+proc sort data=enc out=emerg;
+by EncPatWID;
 run;
 
-proc means data=enc;
-class encPatWID;
-types encPatWID;
-var emerg;
-output out=emerg max(emerg)=emerg n(emerg)=count2;
+data emerg;
+set emerg;
+by EncPatWID;
+if first.EncPatWID then do;
+emerg=0; count2=0;
+end;
+if EncVisitTypeCd="EMERG" then do;
+emerg=1;*inpatient flag;count2=count2+1;
+end;
+if last.EncPatWID then output;
+retain emerg count2;
 run;
+*n=2891;
 
 ods listing;
-options formchar="|----|+|---+=|-/\<>*";
+options formchar="|----|+|---+=|-/\<>*"; 
 proc freq data=emerg;
 tables emerg count2;
-title 'Admissions from 01JAN2003 with Emergency Visits';
+title 'Admissions from 2003 with Emergency Visits';
 run;
 
 /*
-                           Admissions from 01JAN2003 with Emergency Visits                         129
+                              Admissions from 2003 with Emergency Visits                           259
                                                                          15:53 Tuesday, March 31, 2020
 
                                           The FREQ Procedure
@@ -109,6 +120,7 @@ run;
 
 
 
+
 */
 /* ANSWER: There are 1978 patients had at least 1 emergency encounter in 2003*/
 
@@ -118,24 +130,17 @@ encounter) that started in 2003?;
 
 *link inpatient and emerg datasets;
 proc sql;
-create table sql_final as
-select em.*,in.*
-from emerg as em
+create table sql_table as
+select emerg.*,inpt.*
+from emerg as emerg
 	 left join
-     inpt as in
-	 on em.encPatWID = in.encPatWID
+     inpt as inpt
+	 on emerg.encPatWID = inpt.encPatWID
 ;
 quit;
 *n=2891;
 
-*delete with both emerg and inpatient data;
-data eithertype;
-set sql_final;
-if (emerg=1 and inpt=1) then delete;
-run;
-*n=2730;
-
-/*ANSWER: There are 2730 patients had at least 1 visit of either type (inpatient or emergency room 
+/*ANSWER: There are 2891 patients had at least 1 visit of either type (inpatient or emergency room 
 encounter) that started in 2003*/
 
 
@@ -144,6 +149,13 @@ counts the total number encounters (of either type)-for example, a patient with 
 encounter and one emergency room encounter would have a total encounter count of 2. 
 Generate a frequency table of total encounter number for this data set, and paste the (text) 
 table into your assignment- use the SAS tip from class to make the table output text-friendly;
+
+*delete patient with both emerg and inpatient data;
+data eithertype;
+set sql_table;
+if (emerg=1 and inpt=1) then delete;
+run;
+*n=2730;
 
 *create var for total number of encounters;
 data eithertype;
@@ -160,7 +172,7 @@ run;
 *n=2730;
 
 /*
-                            Total Number of Emergency or Inpatient Visits                          130
+                            Total Number of Emergency or Inpatient Visits                          264
                                                                          15:53 Tuesday, March 31, 2020
 
                                           The FREQ Procedure
@@ -168,14 +180,13 @@ run;
                                                          Cumulative    Cumulative
                     totalenc    Frequency     Percent     Frequency      Percent
                     -------------------------------------------------------------
-                           2        2556       93.63          2556        93.63
-                           4         142        5.20          2698        98.83
-                           6          21        0.77          2719        99.60
-                           8           7        0.26          2726        99.85
-                          10           1        0.04          2727        99.89
-                          12           1        0.04          2728        99.93
-                          14           1        0.04          2729        99.96
-                          24           1        0.04          2730       100.00
-
+                           1        2556       93.63          2556        93.63
+                           2         142        5.20          2698        98.83
+                           3          21        0.77          2719        99.60
+                           4           7        0.26          2726        99.85
+                           5           1        0.04          2727        99.89
+                           6           1        0.04          2728        99.93
+                           7           1        0.04          2729        99.96
+                          12           1        0.04          2730       100.00
 
 */
