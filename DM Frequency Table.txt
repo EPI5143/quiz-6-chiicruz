@@ -1,4 +1,0 @@
-DM	Frequency	Percent		Cumulative	Cumulative
-			Frequency			Percent
-0	2147 		96.28 		2147 		96.28 
-1	83		3.72 		2230 		100.00 
